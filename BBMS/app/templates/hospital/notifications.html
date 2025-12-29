@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - BBMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </h5>
+                    {% if notifications %}
+                    <button type="button" class="btn btn-light btn-sm" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double me-1"></i>Mark All as Read
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if notifications %}
+                    <div class="list-group list-group-flush">
+                        {% for notification in notifications %}
+                        <div class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-warning{% endif %}">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        {% if notification.type == 'blood_request' %}
+                                            <i class="fas fa-tint text-danger me-2"></i>
+                                        {% elif notification.type == 'donor' %}
+                                            <i class="fas fa-user-plus text-success me-2"></i>
+                                        {% elif notification.type == 'recipient' %}
+                                            <i class="fas fa-user-injured text-warning me-2"></i>
+                                        {% elif notification.type == 'system' %}
+                                            <i class="fas fa-cog text-secondary me-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-bell text-info me-2"></i>
+                                        {% endif %}
+                                        
+                                        <h6 class="mb-0 {% if not notification.is_read %}fw-bold{% endif %}">
+                                            {{ notification.title }}
+                                        </h6>
+                                        
+                                        {% if not notification.is_read %}
+                                        <span class="badge bg-warning ms-2">New</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <p class="mb-1 text-muted">{{ notification.message }}</p>
+                                    
+                                    {% if notification.related_url %}
+                                    <a href="{{ notification.related_url }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>View Details
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="text-end">
+                                    <small class="text-muted">{{ notification.created_at.strftime('%d %b %Y') }}</small><br>
+                                    <small class="text-muted">{{ notification.created_at.strftime('%I:%M %p') }}</small>
+                                    
+                                    {% if not notification.is_read %}
+                                    <br>
+                                    <button type="button" class="btn btn-sm btn-outline-success mt-1" 
+                                            onclick="markAsRead({{ notification.id }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if notifications.has_prev or notifications.has_next %}
+                    <nav aria-label="Notifications pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if notifications.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('hospital.notifications', page=notifications.prev_num) }}">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for page_num in notifications.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != notifications.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('hospital.notifications', page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                    {% endif %}
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if notifications.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('hospital.notifications', page=notifications.next_num) }}">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No notifications</h5>
+                        <p class="text-muted">You're all caught up! No new notifications at the moment.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function markAsRead(notificationId) {
+    fetch(`/hospital/notifications/mark-read/${notificationId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while marking notification as read.');
+    });
+}
+
+function markAllAsRead() {
+    if (confirm('Mark all notifications as read?')) {
+        fetch('/hospital/notifications/mark-all-read', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while marking notifications as read.');
+        });
+    }
+}
+</script>
+{% endblock %} 

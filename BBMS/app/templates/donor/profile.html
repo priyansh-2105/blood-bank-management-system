@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - BBMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>Profile Information
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    <h5>{{ current_user.name }}</h5>
+                    <p class="text-muted">{{ current_user.email }}</p>
+                    <div class="badge bg-success">Donor</div>
+                </div>
+            </div>
+            
+            <div class="card shadow mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-heartbeat me-2"></i>Blood Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-danger">{{ donor.blood_group }}</h4>
+                            <small class="text-muted">Blood Group</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ donor.age or 'N/A' }}</h4>
+                            <small class="text-muted">Age</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="text-success">{{ donor.donations_count or 0 }}</h6>
+                            <small class="text-muted">Total Donations</small>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-warning">{{ donor.last_donation_date.strftime('%b %Y') if donor.last_donation_date else 'Never' }}</h6>
+                            <small class="text-muted">Last Donation</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('donor.profile') }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ request.form.name if request.form.name else current_user.name }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       value="{{ request.form.phone if request.form.phone else donor.phone }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="age" class="form-label">Age *</label>
+                                <input type="number" class="form-control" id="age" name="age" 
+                                       min="18" max="100" value="{{ request.form.age if request.form.age else donor.age }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label">Gender *</label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male" {% if (request.form.gender or donor.gender) == 'male' %}selected{% endif %}>Male</option>
+                                    <option value="female" {% if (request.form.gender or donor.gender) == 'female' %}selected{% endif %}>Female</option>
+                                    <option value="other" {% if (request.form.gender or donor.gender) == 'other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="blood_group" class="form-label">Blood Group *</label>
+                                <select class="form-select" id="blood_group" name="blood_group" required>
+                                    <option value="">Select Blood Group</option>
+                                    {% for bg in blood_groups %}
+                                    <option value="{{ bg }}" {% if (request.form.blood_group or donor.blood_group) == bg %}selected{% endif %}>{{ bg }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">City *</label>
+                                <input type="text" class="form-control" id="city" name="city" 
+                                       value="{{ request.form.city if request.form.city else donor.city }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="3">{{ request.form.address if request.form.address else donor.address or '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="medical_conditions" class="form-label">Medical Conditions</label>
+                            <textarea class="form-control" id="medical_conditions" name="medical_conditions" rows="3" 
+                                      placeholder="Please mention any medical conditions that might affect blood donation">{{ request.form.medical_conditions if request.form.medical_conditions else donor.medical_conditions or '' }}</textarea>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="is_available" name="is_available" 
+                                   {% if donor.is_available %}checked{% endif %}>
+                            <label class="form-check-label" for="is_available">
+                                Available for blood donation
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-complete for city field
+    const cityInput = document.getElementById('city');
+    if (cityInput) {
+        cityInput.addEventListener('input', function() {
+            const query = this.value;
+            if (query.length > 2) {
+                fetch(`/api/search/cities?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // You can implement dropdown suggestions here
+                        console.log('Cities:', data);
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

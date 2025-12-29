@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Blood Bank Management System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-center py-5 bg-gradient-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-heartbeat text-danger me-3"></i>
+                    Save Lives Through Blood Donation
+                </h1>
+                <p class="lead mb-4">
+                    Connect donors with hospitals efficiently. Our Blood Bank Management System 
+                    streamlines the process of blood donation and distribution, ensuring timely 
+                    access to life-saving blood supplies.
+                </p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Register Now
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/hero-image.svg') }}" 
+                     alt="Blood Donation" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose BBMS?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-users fa-3x text-danger"></i>
+                        </div>
+                        <h5 class="card-title">For Donors</h5>
+                        <p class="card-text">
+                            Easy appointment booking, donation tracking, and certificate generation. 
+                            Make a difference in someone's life with just a few clicks.
+                        </p>
+                        <ul class="list-unstyled text-start">
+                            <li><i class="fas fa-check text-success me-2"></i>Book appointments online</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Track donation history</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Download certificates</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Receive notifications</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-hospital fa-3x text-danger"></i>
+                        </div>
+                        <h5 class="card-title">For Hospitals</h5>
+                        <p class="card-text">
+                            Efficient blood request management, recipient tracking, and donor matching. 
+                            Get the blood you need when you need it.
+                        </p>
+                        <ul class="list-unstyled text-start">
+                            <li><i class="fas fa-check text-success me-2"></i>Submit blood requests</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Manage recipients</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Track request status</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Find matching donors</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-shield-alt fa-3x text-danger"></i>
+                        </div>
+                        <h5 class="card-title">Secure & Reliable</h5>
+                        <p class="card-text">
+                            Built with security in mind. Your data is protected with encryption 
+                            and secure authentication systems.
+                        </p>
+                        <ul class="list-unstyled text-start">
+                            <li><i class="fas fa-check text-success me-2"></i>Email verification</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Secure authentication</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Data encryption</li>
+                            <li><i class="fas fa-check text-success me-2"></i>24/7 availability</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Our Impact</h2>
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <i class="fas fa-user-friends fa-2x text-danger mb-3"></i>
+                    <h3 class="fw-bold">1000+</h3>
+                    <p class="text-muted">Registered Donors</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <i class="fas fa-hospital fa-2x text-danger mb-3"></i>
+                    <h3 class="fw-bold">50+</h3>
+                    <p class="text-muted">Partner Hospitals</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <i class="fas fa-tint fa-2x text-danger mb-3"></i>
+                    <h3 class="fw-bold">5000+</h3>
+                    <p class="text-muted">Blood Units Donated</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <i class="fas fa-heart fa-2x text-danger mb-3"></i>
+                    <h3 class="fw-bold">1000+</h3>
+                    <p class="text-muted">Lives Saved</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">How It Works</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="step-number mb-3">1</div>
+                    <h5>Register</h5>
+                    <p>Create an account as a donor or hospital. Complete your profile with necessary details.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="step-number mb-3">2</div>
+                    <h5>Connect</h5>
+                    <p>Donors book appointments, hospitals submit blood requests. Our system matches them efficiently.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="step-number mb-3">3</div>
+                    <h5>Donate</h5>
+                    <p>Donors visit hospitals for blood donation. Hospitals manage the donation process.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="step-number mb-3">4</div>
+                    <h5>Save Lives</h5>
+                    <p>Blood is used to save lives. Donors receive certificates, hospitals track inventory.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="py-5 bg-danger text-white text-center">
+    <div class="container">
+        <h2 class="mb-4">Ready to Make a Difference?</h2>
+        <p class="lead mb-4">Join thousands of donors and hospitals working together to save lives.</p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Become a Donor
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-hospital me-2"></i>Register Hospital
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+}
+
+.feature-icon {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-item {
+    padding: 2rem 1rem;
+}
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %} 

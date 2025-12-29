@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Profile - BBMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Complete Your Profile
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Please provide additional information to complete your profile. This information will help us provide better services.
+                    </p>
+                    
+                    <form method="POST" action="{{ url_for('auth.complete_profile') }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       value="{{ request.form.phone if request.form.phone else '' }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="age" class="form-label">Age *</label>
+                                <input type="number" class="form-control" id="age" name="age" 
+                                       min="18" max="100" value="{{ request.form.age if request.form.age else '' }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label">Gender *</label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male" {% if request.form.gender == 'male' %}selected{% endif %}>Male</option>
+                                    <option value="female" {% if request.form.gender == 'female' %}selected{% endif %}>Female</option>
+                                    <option value="other" {% if request.form.gender == 'other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">City *</label>
+                                <input type="text" class="form-control" id="city" name="city" 
+                                       value="{{ request.form.city if request.form.city else '' }}" required>
+                            </div>
+                        </div>
+                        
+                        {% if current_user.role == 'donor' %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="blood_group" class="form-label">Blood Group *</label>
+                                <select class="form-select" id="blood_group" name="blood_group" required>
+                                    <option value="">Select Blood Group</option>
+                                    <option value="A+" {% if request.form.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                    <option value="A-" {% if request.form.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                    <option value="B+" {% if request.form.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                    <option value="B-" {% if request.form.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                    <option value="AB+" {% if request.form.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                    <option value="AB-" {% if request.form.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                    <option value="O+" {% if request.form.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                    <option value="O-" {% if request.form.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="last_donation" class="form-label">Last Donation Date</label>
+                                <input type="date" class="form-control" id="last_donation" name="last_donation" 
+                                       value="{{ request.form.last_donation if request.form.last_donation else '' }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="medical_conditions" class="form-label">Medical Conditions (if any)</label>
+                            <textarea class="form-control" id="medical_conditions" name="medical_conditions" 
+                                      rows="3" placeholder="Please mention any medical conditions that might affect blood donation">{{ request.form.medical_conditions if request.form.medical_conditions else '' }}</textarea>
+                        </div>
+                        {% endif %}
+                        
+                        {% if current_user.role == 'hospital' %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="license_number" class="form-label">Hospital License Number *</label>
+                                <input type="text" class="form-control" id="license_number" name="license_number" 
+                                       value="{{ request.form.license_number if request.form.license_number else '' }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="hospital_type" class="form-label">Hospital Type *</label>
+                                <select class="form-select" id="hospital_type" name="hospital_type" required>
+                                    <option value="">Select Hospital Type</option>
+                                    <option value="government" {% if request.form.hospital_type == 'government' %}selected{% endif %}>Government</option>
+                                    <option value="private" {% if request.form.hospital_type == 'private' %}selected{% endif %}>Private</option>
+                                    <option value="charity" {% if request.form.hospital_type == 'charity' %}selected{% endif %}>Charity</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Hospital Address *</label>
+                            <textarea class="form-control" id="address" name="address" 
+                                      rows="3" placeholder="Enter complete hospital address" required>{{ request.form.address if request.form.address else '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="specialties" class="form-label">Medical Specialties</label>
+                            <textarea class="form-control" id="specialties" name="specialties" 
+                                      rows="3" placeholder="List the medical specialties and services offered">{{ request.form.specialties if request.form.specialties else '' }}</textarea>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Complete Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-complete for city field
+document.addEventListener('DOMContentLoaded', function() {
+    const cityInput = document.getElementById('city');
+    if (cityInput) {
+        cityInput.addEventListener('input', function() {
+            const query = this.value;
+            if (query.length > 2) {
+                fetch(`/api/search/cities?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // You can implement dropdown suggestions here
+                        console.log('Cities:', data);
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

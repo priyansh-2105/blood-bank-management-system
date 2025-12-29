@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment - BBMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Blood Donation Appointment
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Schedule your blood donation appointment. Please select a hospital and preferred date/time.
+                    </p>
+                    
+                    <form method="POST" action="{{ url_for('donor.book_appointment') }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="hospital_id" class="form-label">Select Hospital *</label>
+                                <select class="form-select" id="hospital_id" name="hospital_id" required>
+                                    <option value="">Choose a hospital</option>
+                                    {% for hospital in hospitals %}
+                                    <option value="{{ hospital.id }}" {% if request.form.hospital_id and request.form.hospital_id|int == hospital.id %}selected{% endif %}>
+                                        {{ hospital.user.name }} - {{ hospital.city }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="appointment_date" class="form-label">Preferred Date *</label>
+                                <input type="date" class="form-control" id="appointment_date" name="appointment_date" 
+                                       value="{{ request.form.appointment_date if request.form.appointment_date else '' }}" 
+                                       min="{{ today }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="appointment_time" class="form-label">Preferred Time *</label>
+                                <select class="form-select" id="appointment_time" name="appointment_time" required>
+                                    <option value="">Select time</option>
+                                    <option value="09:00" {% if request.form.appointment_time == '09:00' %}selected{% endif %}>9:00 AM</option>
+                                    <option value="10:00" {% if request.form.appointment_time == '10:00' %}selected{% endif %}>10:00 AM</option>
+                                    <option value="11:00" {% if request.form.appointment_time == '11:00' %}selected{% endif %}>11:00 AM</option>
+                                    <option value="12:00" {% if request.form.appointment_time == '12:00' %}selected{% endif %}>12:00 PM</option>
+                                    <option value="14:00" {% if request.form.appointment_time == '14:00' %}selected{% endif %}>2:00 PM</option>
+                                    <option value="15:00" {% if request.form.appointment_time == '15:00' %}selected{% endif %}>3:00 PM</option>
+                                    <option value="16:00" {% if request.form.appointment_time == '16:00' %}selected{% endif %}>4:00 PM</option>
+                                    <option value="17:00" {% if request.form.appointment_time == '17:00' %}selected{% endif %}>5:00 PM</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="blood_group" class="form-label">Blood Group *</label>
+                                <select class="form-select" id="blood_group" name="blood_group" required>
+                                    <option value="">Select blood group</option>
+                                    <option value="A+" {% if request.form.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                    <option value="A-" {% if request.form.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                    <option value="B+" {% if request.form.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                    <option value="B-" {% if request.form.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                    <option value="AB+" {% if request.form.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                    <option value="AB-" {% if request.form.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                    <option value="O+" {% if request.form.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                    <option value="O-" {% if request.form.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="Any special requirements or notes for the hospital">{{ request.form.notes if request.form.notes else '' }}</textarea>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Important:</strong> Please ensure you meet the following requirements:
+                            <ul class="mb-0 mt-2">
+                                <li>Age between 18-65 years</li>
+                                <li>Weight at least 50 kg</li>
+                                <li>No recent illness or medication</li>
+                                <li>Last donation was at least 3 months ago</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('donor.dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calendar-check me-2"></i>Book Appointment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('appointment_date').min = today;
+    
+    // Auto-select donor's blood group
+    const donorBloodGroup = '{{ current_user.donor.blood_group if current_user.donor else "" }}';
+    if (donorBloodGroup) {
+        document.getElementById('blood_group').value = donorBloodGroup;
+    }
+    
+    // Filter hospitals by city
+    const hospitalSelect = document.getElementById('hospital_id');
+    const cityFilter = document.getElementById('city_filter');
+    
+    if (cityFilter) {
+        cityFilter.addEventListener('change', function() {
+            const selectedCity = this.value;
+            const options = hospitalSelect.options;
+            
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                if (option.value === '') continue; // Skip placeholder
+                
+                if (selectedCity === '' || option.text.includes(selectedCity)) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

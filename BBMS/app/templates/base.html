@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blood Bank Management System{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('auth.index') }}">
+                <i class="fas fa-heartbeat me-2"></i>
+                BBMS
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'donor' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('donor.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('donor.book_appointment') }}">
+                                    <i class="fas fa-calendar-plus me-1"></i>Book Appointment
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('donor.appointments') }}">
+                                    <i class="fas fa-calendar-check me-1"></i>Appointments
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('donor.donations') }}">
+                                    <i class="fas fa-history me-1"></i>Donation History
+                                </a>
+                            </li>
+                        {% elif current_user.role == 'hospital' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('hospital.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('hospital.request_blood') }}">
+                                    <i class="fas fa-plus-circle me-1"></i>Request Blood
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('hospital.requests') }}">
+                                    <i class="fas fa-list me-1"></i>Requests
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('hospital.recipients') }}">
+                                    <i class="fas fa-users me-1"></i>Recipients
+                                </a>
+                            </li>
+                        {% elif current_user.role == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.donors') }}">
+                                    <i class="fas fa-user-friends me-1"></i>Donors
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.hospitals') }}">
+                                    <i class="fas fa-hospital me-1"></i>Hospitals
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.requests') }}">
+                                    <i class="fas fa-list me-1"></i>Requests
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                                <i class="fas fa-bell me-1"></i>
+                                <span id="notification-count" class="badge bg-warning text-dark">0</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" id="notifications-menu" aria-labelledby="notificationsDropdown">
+                                <li><h6 class="dropdown-header">Notifications</h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for(current_user.role + '.notifications') }}">View All</a></li>
+                            </ul>
+                        </li>
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
+                                <i class="fas fa-user-circle me-1"></i>
+                                {{ current_user.name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                {% if current_user.role == 'donor' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('donor.profile') }}">
+                                        <i class="fas fa-user-edit me-2"></i>Profile
+                                    </a></li>
+                                {% elif current_user.role == 'hospital' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('hospital.profile') }}">
+                                        <i class="fas fa-user-edit me-2"></i>Profile
+                                    </a></li>
+                                {% endif %}
+                                                        <li><a class="dropdown-item" href="{{ url_for(current_user.role + '.notifications') }}">
+                            <i class="fas fa-bell me-2"></i>Notifications
+                        </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.register') }}">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-heartbeat me-2"></i>Blood Bank Management System</h5>
+                    <p class="mb-0">Connecting donors with hospitals to save lives.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2024 BBMS. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Notification System -->
+    {% if current_user.is_authenticated %}
+    <script>
+        // Update notification count
+        function updateNotificationCount() {
+            fetch('/api/notifications/unread-count')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('notification-count');
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                });
+        }
+
+        // Load recent notifications
+        function loadRecentNotifications() {
+            fetch('/api/notifications/recent')
+                .then(response => response.json())
+                .then(data => {
+                    const menu = document.getElementById('notifications-menu');
+                    const divider = menu.querySelector('.dropdown-divider');
+                    
+                    // Remove existing notification items
+                    const existingItems = menu.querySelectorAll('.notification-item');
+                    existingItems.forEach(item => item.remove());
+                    
+                    // Add new notification items
+                    data.notifications.forEach(notification => {
+                        const item = document.createElement('li');
+                        item.className = 'notification-item';
+                        item.innerHTML = `
+                            <a class="dropdown-item ${notification.is_read ? '' : 'fw-bold'}" href="#">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-${notification.type === 'success' ? 'check-circle text-success' : 
+                                                      notification.type === 'warning' ? 'exclamation-triangle text-warning' : 
+                                                      notification.type === 'error' ? 'times-circle text-danger' : 
+                                                      'info-circle text-info'} me-2"></i>
+                                    <div>
+                                        <div class="small">${notification.title}</div>
+                                        <div class="small text-muted">${notification.message}</div>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                        menu.insertBefore(item, divider);
+                    });
+                });
+        }
+
+        // Update notifications on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNotificationCount();
+            loadRecentNotifications();
+            
+            // Update every 30 seconds
+            setInterval(updateNotificationCount, 30000);
+            setInterval(loadRecentNotifications, 30000);
+        });
+    </script>
+    {% endif %}
+</body>
+</html> 

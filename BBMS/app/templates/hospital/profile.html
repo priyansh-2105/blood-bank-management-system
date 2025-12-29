@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Profile - BBMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-hospital me-2"></i>Hospital Information
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-hospital fa-5x text-primary"></i>
+                    </div>
+                    <h5>{{ current_user.name }}</h5>
+                    <p class="text-muted">{{ current_user.email }}</p>
+                    <div class="badge bg-info">Hospital</div>
+                    {% if hospital.is_verified %}
+                    <div class="badge bg-success mt-1">Verified</div>
+                    {% else %}
+                    <div class="badge bg-warning mt-1">Pending Verification</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Hospital Details
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="text-primary">{{ hospital.license_number }}</h6>
+                            <small class="text-muted">License Number</small>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-success">{{ hospital.hospital_type|title }}</h6>
+                            <small class="text-muted">Type</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="text-warning">{{ hospital.city }}</h6>
+                            <small class="text-muted">City</small>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-info">{{ hospital.phone }}</h6>
+                            <small class="text-muted">Phone</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('hospital.profile') }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Hospital Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ request.form.name if request.form.name else current_user.name }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       value="{{ request.form.phone if request.form.phone else hospital.phone }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="license_number" class="form-label">License Number *</label>
+                                <input type="text" class="form-control" id="license_number" name="license_number" 
+                                       value="{{ request.form.license_number if request.form.license_number else hospital.license_number }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="hospital_type" class="form-label">Hospital Type *</label>
+                                <select class="form-select" id="hospital_type" name="hospital_type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="government" {% if (request.form.hospital_type or hospital.hospital_type) == 'government' %}selected{% endif %}>Government</option>
+                                    <option value="private" {% if (request.form.hospital_type or hospital.hospital_type) == 'private' %}selected{% endif %}>Private</option>
+                                    <option value="charity" {% if (request.form.hospital_type or hospital.hospital_type) == 'charity' %}selected{% endif %}>Charity</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">City *</label>
+                                <input type="text" class="form-control" id="city" name="city" 
+                                       value="{{ request.form.city if request.form.city else hospital.city }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="age" class="form-label">Age *</label>
+                                <input type="number" class="form-control" id="age" name="age" 
+                                       min="18" max="100" value="{{ request.form.age if request.form.age else hospital.age }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label">Gender *</label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male" {% if (request.form.gender or hospital.gender) == 'male' %}selected{% endif %}>Male</option>
+                                    <option value="female" {% if (request.form.gender or hospital.gender) == 'female' %}selected{% endif %}>Female</option>
+                                    <option value="other" {% if (request.form.gender or hospital.gender) == 'other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Hospital Address *</label>
+                            <textarea class="form-control" id="address" name="address" 
+                                      rows="3" required>{{ request.form.address if request.form.address else hospital.address or '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="specialties" class="form-label">Medical Specialties</label>
+                            <textarea class="form-control" id="specialties" name="specialties" 
+                                      rows="3" placeholder="List the medical specialties and services offered">{{ request.form.specialties if request.form.specialties else hospital.specialties or '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-complete for city field
+    const cityInput = document.getElementById('city');
+    if (cityInput) {
+        cityInput.addEventListener('input', function() {
+            const query = this.value;
+            if (query.length > 2) {
+                fetch(`/api/search/cities?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // You can implement dropdown suggestions here
+                        console.log('Cities:', data);
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+
+{% block title %}My Appointments - BBMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>My Appointments
+                    </h5>
+                    <a href="{{ url_for('donor.book_appointment') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-plus me-1"></i>Book New Appointment
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Search and Filter Controls -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <form method="GET" class="row g-3">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="search" 
+                                           placeholder="Search by hospital..." 
+                                           value="{{ search_query }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="date" class="form-control" name="date_from" 
+                                           placeholder="From date" value="{{ date_from }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="date" class="form-control" name="date_to" 
+                                           placeholder="To date" value="{{ date_to }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" name="status" value="{{ status_filter }}">
+                            </form>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{{ url_for('donor.appointments') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-times me-1"></i>Clear Filters
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <ul class="nav nav-tabs mb-4" id="appointmentTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {{ 'active' if status_filter == 'upcoming' else '' }}" 
+                                    id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" 
+                                    type="button" role="tab" onclick="changeTab('upcoming')">
+                                <i class="fas fa-clock me-1"></i>Upcoming
+                                <span class="badge bg-warning ms-1">{{ upcoming_count }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {{ 'active' if status_filter == 'completed' else '' }}" 
+                                    id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" 
+                                    type="button" role="tab" onclick="changeTab('completed')">
+                                <i class="fas fa-check-circle me-1"></i>Completed
+                                <span class="badge bg-success ms-1">{{ completed_count }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {{ 'active' if status_filter == 'cancelled' else '' }}" 
+                                    id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" 
+                                    type="button" role="tab" onclick="changeTab('cancelled')">
+                                <i class="fas fa-times-circle me-1"></i>Cancelled
+                                <span class="badge bg-secondary ms-1">{{ cancelled_count }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {{ 'active' if status_filter == 'all' else '' }}" 
+                                    id="all-tab" data-bs-toggle="tab" data-bs-target="#all" 
+                                    type="button" role="tab" onclick="changeTab('all')">
+                                <i class="fas fa-list me-1"></i>All
+                                <span class="badge bg-info ms-1">{{ all_count }}</span>
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="appointmentTabContent">
+                        <div class="tab-pane fade {{ 'show active' if status_filter == 'upcoming' else '' }}" 
+                             id="upcoming" role="tabpanel">
+                            {% if appointments.items %}
+                                <div class="row">
+                                    {% for appointment in appointments.items %}
+                                    <div class="col-lg-6 col-xl-4 mb-4">
+                                        <div class="card h-100 border-{{ 'success' if appointment.status == 'confirmed' else 'warning' }}">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">
+                                                    <i class="fas fa-hospital me-2"></i>
+                                                    {{ appointment.hospital.user.name }}
+                                                </h6>
+                                                <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' }}">
+                                                    {{ appointment.status|title }}
+                                                </span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Date</small><br>
+                                                        <strong>{{ appointment.appointment_date.strftime('%d %b %Y') }}</strong>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Time</small><br>
+                                                        <strong>{{ appointment.appointment_date.strftime('%I:%M %p') }}</strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Blood Group</small><br>
+                                                        <span class="badge bg-danger">{{ appointment.donor.blood_group }}</span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Location</small><br>
+                                                        <small>{{ appointment.hospital.city }}</small>
+                                                    </div>
+                                                </div>
+                                                {% if appointment.notes %}
+                                                <div class="mb-3">
+                                                    <small class="text-muted">Notes</small><br>
+                                                    <small>{{ appointment.notes[:100] }}{% if appointment.notes|length > 100 %}...{% endif %}</small>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="card-footer">
+                                                <div class="btn-group w-100" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                            data-bs-toggle="modal" data-bs-target="#appointmentModal{{ appointment.id }}">
+                                                        <i class="fas fa-eye"></i> Details
+                                                    </button>
+                                                    {% if appointment.status == 'pending' %}
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="cancelAppointment({{ appointment.id }})">
+                                                        <i class="fas fa-times"></i> Cancel
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No upcoming appointments</h5>
+                                    <p class="text-muted">You don't have any upcoming appointments.</p>
+                                    <a href="{{ url_for('donor.book_appointment') }}" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Book Your First Appointment
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="tab-pane fade {{ 'show active' if status_filter == 'completed' else '' }}" 
+                             id="completed" role="tabpanel">
+                            {% if appointments.items %}
+                                <div class="row">
+                                    {% for appointment in appointments.items %}
+                                    <div class="col-lg-6 col-xl-4 mb-4">
+                                        <div class="card h-100 border-success opacity-75">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">
+                                                    <i class="fas fa-hospital me-2"></i>
+                                                    {{ appointment.hospital.user.name }}
+                                                </h6>
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Completed
+                                                </span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Date</small><br>
+                                                        <strong>{{ appointment.appointment_date.strftime('%d %b %Y') }}</strong>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Time</small><br>
+                                                        <strong>{{ appointment.appointment_date.strftime('%I:%M %p') }}</strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Blood Group</small><br>
+                                                        <span class="badge bg-danger">{{ appointment.donor.blood_group }}</span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Location</small><br>
+                                                        <small>{{ appointment.hospital.city }}</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                <button type="button" class="btn btn-sm btn-outline-primary w-100" 
+                                                        data-bs-toggle="modal" data-bs-target="#appointmentModal{{ appointment.id }}">
+                                                    <i class="fas fa-eye"></i> View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No completed appointments</h5>
+                                    <p class="text-muted">You haven't completed any appointments yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="tab-pane fade {{ 'show active' if status_filter == 'cancelled' else '' }}" 
+                             id="cancelled" role="tabpanel">
+                            {% if appointments.items %}
+                                <div class="row">
+                                    {% for appointment in appointments.items %}
+                                    <div class="col-lg-6 col-xl-4 mb-4">
+                                        <div class="card h-100 border-secondary opacity-75">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">
+                                                    <i class="fas fa-hospital me-2"></i>
+                                                    {{ appointment.hospital.user.name }}
+                                                </h6>
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-times me-1"></i>Cancelled
+                                                </span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Date</small><br>
+                                                        <strong>{{ appointment.appointment_date.strftime('%d %b %Y') }}</strong>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Time</small><br>
+                                                        <strong>{{ appointment.appointment_date.strftime('%I:%M %p') }}</strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Blood Group</small><br>
+                                                        <span class="badge bg-danger">{{ appointment.donor.blood_group }}</span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Location</small><br>
+                                                        <small>{{ appointment.hospital.city }}</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary w-100" 
+                                                        data-bs-toggle="modal" data-bs-target="#appointmentModal{{ appointment.id }}">
+                                                    <i class="fas fa-eye"></i> View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-times-circle fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No cancelled appointments</h5>
+                                    <p class="text-muted">You haven't cancelled any appointments.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="tab-pane fade {{ 'show active' if status_filter == 'all' else '' }}" 
+                             id="all" role="tabpanel">
+                            {% if appointments.items %}
+                                <div class="row">
+                                    {% for appointment in appointments.items %}
+                                    <div class="col-lg-6 col-xl-4 mb-4">
+                                        <div class="card h-100 border-{{ 'success' if appointment.status == 'completed' else 'secondary' if appointment.status == 'cancelled' else 'success' if appointment.status == 'confirmed' else 'warning' }}">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">
+                                                    <i class="fas fa-hospital me-2"></i>
+                                                    {{ appointment.hospital.user.name }}
+                                                </h6>
+                                                <span class="badge bg-{{ 'success' if appointment.status == 'completed' else 'secondary' if appointment.status == 'cancelled' else 'success' if appointment.status == 'confirmed' else 'warning' }}">
+                                                    {{ appointment.status|title }}
+                                                </span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Date</small><br>
+                                                        <strong>{{ appointment.appointment_date.strftime('%d %b %Y') }}</strong>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Time</small><br>
+                                                        <strong>{{ appointment.appointment_date.strftime('%I:%M %p') }}</strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Blood Group</small><br>
+                                                        <span class="badge bg-danger">{{ appointment.donor.blood_group }}</span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="text-muted">Location</small><br>
+                                                        <small>{{ appointment.hospital.city }}</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                <div class="btn-group w-100" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                            data-bs-toggle="modal" data-bs-target="#appointmentModal{{ appointment.id }}">
+                                                        <i class="fas fa-eye"></i> Details
+                                                    </button>
+                                                    {% if appointment.status in ['pending', 'confirmed'] %}
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="cancelAppointment({{ appointment.id }})">
+                                                        <i class="fas fa-times"></i> Cancel
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No appointments found</h5>
+                                    <p class="text-muted">You haven't booked any appointments yet.</p>
+                                    <a href="{{ url_for('donor.book_appointment') }}" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Book Your First Appointment
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if appointments.pages > 1 %}
+                    <nav aria-label="Appointments pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if appointments.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('donor.appointments', page=appointments.prev_num, status=status_filter, search=search_query, date_from=date_from, date_to=date_to) }}">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for page_num in appointments.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != appointments.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('donor.appointments', page=page_num, status=status_filter, search=search_query, date_from=date_from, date_to=date_to) }}">{{ page_num }}</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if appointments.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('donor.appointments', page=appointments.next_num, status=status_filter, search=search_query, date_from=date_from, date_to=date_to) }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment Detail Modals -->
+{% for appointment in appointments.items %}
+<div class="modal fade" id="appointmentModal{{ appointment.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Appointment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Hospital:</strong><br>
+                        {{ appointment.hospital.user.name }}<br>
+                        <small class="text-muted">{{ appointment.hospital.address }}</small>
+                    </div>
+                    <div class="col-6">
+                        <strong>Contact:</strong><br>
+                        {{ appointment.hospital.phone }}
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Date:</strong><br>
+                        {{ appointment.appointment_date.strftime('%d %B %Y') }}
+                    </div>
+                    <div class="col-6">
+                        <strong>Time:</strong><br>
+                        {{ appointment.appointment_date.strftime('%I:%M %p') }}
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Blood Group:</strong><br>
+                        <span class="badge bg-danger">{{ appointment.donor.blood_group }}</span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Status:</strong><br>
+                        {% if appointment.status == 'pending' %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% elif appointment.status == 'confirmed' %}
+                            <span class="badge bg-success">Confirmed</span>
+                        {% elif appointment.status == 'completed' %}
+                            <span class="badge bg-info">Completed</span>
+                        {% elif appointment.status == 'cancelled' %}
+                            <span class="badge bg-secondary">Cancelled</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if appointment.notes %}
+                <hr>
+                <div>
+                    <strong>Notes:</strong><br>
+                    {{ appointment.notes }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {% if appointment.status in ['pending', 'confirmed'] %}
+                <button type="button" class="btn btn-danger" onclick="cancelAppointment({{ appointment.id }})">
+                    Cancel Appointment
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function changeTab(status) {
+    const url = new URL(window.location);
+    url.searchParams.set('status', status);
+    url.searchParams.set('page', '1'); // Reset to first page when changing tabs
+    window.location.href = url.toString();
+}
+
+function cancelAppointment(appointmentId) {
+    if (confirm('Are you sure you want to cancel this appointment?')) {
+        window.location.href = `/appointments/${appointmentId}/cancel`;
+    }
+}
+</script>
+{% endblock %} 
